@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Licitaciones{% endblock %}
+{% block content %}
+<h2 class="mb-4">Gestión de Licitaciones</h2>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('obtener_licitaciones') }}">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="fecha" class="form-label">Fecha (DD/MM/AAAA)</label>
+                    <input type="text" class="form-control" id="fecha" name="fecha" placeholder="Selecciona una fecha" value="{{ fecha_ingresada if fecha_ingresada else '' }}">
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Obtener Licitaciones</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if fecha_ingresada %}
+    <div class="alert alert-info">
+        Mostrando licitaciones para la fecha: <strong>{{ fecha_ingresada }}</strong>
+    </div>
+{% endif %}
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-primary">
+            <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha Cierre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for licitacion in licitaciones %}
+            <tr>
+                <td>{{ licitacion.id }}</td>
+                <td>{{ licitacion.codigo }}</td>
+                <td>{{ licitacion.nombre }}</td>
+                <td>{{ licitacion.descripcion }}</td>
+                <td>{{ licitacion.fecha_cierre }}</td>
+                <td>
+                    <a href="{{ url_for('actualizar_licitacion', id=licitacion.id) }}" class="btn btn-sm btn-info">Editar</a>
+                    <form action="{{ url_for('eliminar_licitacion', id=licitacion.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta licitación?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">No hay licitaciones registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginador -->
+{% if total_pages > 1 %}
+<nav aria-label="Paginación de licitaciones">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('licitaciones', page=current_page-1, fecha=fecha_ingresada) if current_page > 1 else '#' }}">Anterior</a>
+        </li>
+        {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == current_page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('licitaciones', page=p, fecha=fecha_ingresada) }}">{{ p }}</a>
+            </li>
+        {% endfor %}
+        <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('licitaciones', page=current_page+1, fecha=fecha_ingresada) if current_page < total_pages else '#' }}">Siguiente</a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
